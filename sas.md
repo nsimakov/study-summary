@@ -46,6 +46,10 @@ proc means data=insomnia_stacked mean std maxdec=2;
   class group time;
   var cortisol;
 run;
+
+proc corr data=table2;
+  var y x2 x2'
+run;
 ```
 
 ## Plotting
@@ -56,8 +60,13 @@ proc univariate data=insomnia_stacked noprint; /*histogram*/
   var cortisol;
   histogram / nrows=6 ncols=1;
 run;
+proc gplot data = insomnia_stacked;
+  plot y*(x1 x2);
+run;
 proc sgplot data = insomnia_stacked; /*scatter*/
   series x=time y=cortisol / group=id;
+  /*refline -1 1;*/
+  /*xaxis values=(1 to 20 by 1)'*/
 run;
 proc sgpanel data=insomnia_stacked; /*scatter in panels*/
   panelby id / columns=6 rows=4;
@@ -74,4 +83,22 @@ plots=matrix(histogram nvar=all);
 run;
 ```
 
+## Linear Regression
 
+```sas
+proc reg data=table3
+  model y = x1 x2 x3/clb covb /*ss1 ss2 pcorr1 pcorr2 influence*/;
+  output= outdata p=yhat lclm=lclm uclm=uclm lcl=lcl ucl=ucl cookd=cookd;
+  /*test1: test x1=0,x2=0*/
+run; quit;
+```
+
+## One Way Anova
+
+```sas
+proc reg data=table3
+  model y = x1 x2 x3/clb covb /*ss1 ss2 pcorr1 pcorr2 influence*/;
+  output= outdata p=yhat lclm=lclm uclm=uclm lcl=lcl ucl=ucl cookd=cookd;
+  /*test1: test x1=0,x2=0*/
+run; quit;
+```
